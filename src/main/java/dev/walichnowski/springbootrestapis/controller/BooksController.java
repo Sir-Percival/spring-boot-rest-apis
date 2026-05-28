@@ -2,6 +2,8 @@ package dev.walichnowski.springbootrestapis.controller;
 
 import dev.walichnowski.springbootrestapis.entity.Book;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -35,8 +37,22 @@ public class BooksController
     }
 
     @GetMapping("/api/books")
-    public List<Book> getBooks()
+    public List<Book> getBooks(@RequestParam(required = false) String category)
     {
-        return books;
+        if(category == null)
+            return books;
+
+        return books.stream()
+                .filter(book -> book.getCategory().equalsIgnoreCase(category))
+                .toList();
+    }
+
+    @GetMapping("/api/books/{title}")
+    public Book getBookByTitle(@PathVariable String title)
+    {
+        return books.stream()
+                .filter(book -> book.getTitle().equalsIgnoreCase(title))
+                .findFirst()
+                .orElse(null);
     }
 }
