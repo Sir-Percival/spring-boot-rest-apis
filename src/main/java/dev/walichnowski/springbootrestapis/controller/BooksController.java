@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/books")
 public class BooksController
 {
     private final List<Book> books = new ArrayList<>();
@@ -30,13 +31,7 @@ public class BooksController
         ));
     }
 
-    @GetMapping("/api")
-    public String helloAPI()
-    {
-        return "Hello from API!";
-    }
-
-    @GetMapping("/api/books")
+    @GetMapping
     public List<Book> getBooks(@RequestParam(required = false) String category)
     {
         if(category == null)
@@ -47,7 +42,7 @@ public class BooksController
                 .toList();
     }
 
-    @GetMapping("/api/books/{title}")
+    @GetMapping("/{title}")
     public Book getBookByTitle(@PathVariable String title)
     {
         return books.stream()
@@ -56,7 +51,7 @@ public class BooksController
                 .orElse(null);
     }
 
-    @PostMapping("/api/books")
+    @PostMapping
     public void createBook(@RequestBody Book newBook)
     {
         boolean isNewBook = books.stream()
@@ -66,7 +61,7 @@ public class BooksController
             books.add(newBook);
     }
 
-    @PutMapping("/api/books/{title}")
+    @PutMapping("/{title}")
     public void updateBook(@PathVariable String title, @RequestBody Book updatedBook)
     {
         for(int i = 0; i < books.size(); i++)
@@ -81,7 +76,7 @@ public class BooksController
 
     @Operation(summary = "Delete book by title", description = "Deletes book by provided title")
     @ApiResponse(responseCode = "200", description = "Successfully deleted")
-    @DeleteMapping("/api/books/{title}")
+    @DeleteMapping("/{title}")
     public void deleteBook(@PathVariable @Parameter(name = "title", description = "Book's title", example = "Title 1") String title)
     {
         books.removeIf(book -> book.getTitle().equalsIgnoreCase(title));
