@@ -1,6 +1,7 @@
 package dev.walichnowski.springbootrestapis.controller;
 
 import dev.walichnowski.springbootrestapis.entity.Book;
+import dev.walichnowski.springbootrestapis.exception.BookNotFoundException;
 import dev.walichnowski.springbootrestapis.request.BookRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,7 +57,7 @@ public class BooksController
         return books.stream()
                 .filter(book -> book.getId() == id)
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new BookNotFoundException("Book not found - " + id));
     }
 
     @Operation(summary = "Create a new book")
@@ -71,16 +72,18 @@ public class BooksController
     @Operation(summary = "Update a book", description = "Update the details of an existing book")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    public void updateBook(@PathVariable @Min(1) long id, @Valid @RequestBody BookRequest bookRequest)
+    public Book updateBook(@PathVariable @Min(1) long id, @Valid @RequestBody BookRequest bookRequest)
     {
         for(int i = 0; i < books.size(); i++)
         {
             if(books.get(i).getId() == id)
             {
-                books.set(i, convertRequestToBook(id, bookRequest));
-                return;
+                Book updatedBook = convertRequestToBook(id, bookRequest);
+                books.set(i, updatedBook);
+                return updatedBook;
             }
         }
+        throw new BookNotFoundException("Book not found - " + id);
     }
 
     @Operation(summary = "Delete a book", description = "Delete a book by given Id")
@@ -89,7 +92,9 @@ public class BooksController
     @DeleteMapping("/{id}")
     public void deleteBook(@PathVariable @Min(1) @Parameter(name = "id", description = "Book's id", example = "1") long id)
     {
-        books.removeIf(book -> book.getId() == id);
+        boolean removed = books.removeIf(book -> book.getId() == id);
+        if(!removed)
+            throw new BookNotFoundException("Book not found - " + id);
     }
 
     private Book convertRequestToBook(long id, BookRequest request)
