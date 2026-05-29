@@ -5,13 +5,16 @@ import dev.walichnowski.springbootrestapis.request.BookRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag(name = "Books API", description = "Operations related to books")
 @RestController
 @RequestMapping("/api/books")
 public class BooksController
@@ -34,6 +37,7 @@ public class BooksController
         ));
     }
 
+    @Operation(summary = "Get all books", description = "Retrieve a list of all available books")
     @GetMapping
     public List<Book> getBooks(@RequestParam(required = false) String category)
     {
@@ -45,6 +49,7 @@ public class BooksController
                 .toList();
     }
 
+    @Operation(summary = "Get a book by Id", description = "Retrieve a specific book by Id")
     @GetMapping("/{id}")
     public Book getBookById(@PathVariable @Min(1) long id)
     {
@@ -54,6 +59,8 @@ public class BooksController
                 .orElse(null);
     }
 
+    @Operation(summary = "Create a new book")
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createBook(@Valid @RequestBody BookRequest bookRequest)
     {
@@ -61,6 +68,8 @@ public class BooksController
         books.add(convertRequestToBook(id, bookRequest));
     }
 
+    @Operation(summary = "Update a book", description = "Update the details of an existing book")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
     public void updateBook(@PathVariable @Min(1) long id, @Valid @RequestBody BookRequest bookRequest)
     {
@@ -74,8 +83,9 @@ public class BooksController
         }
     }
 
-    @Operation(summary = "Delete book by id", description = "Deletes book by provided id")
-    @ApiResponse(responseCode = "200", description = "Successfully deleted")
+    @Operation(summary = "Delete a book", description = "Delete a book by given Id")
+    @ApiResponse(responseCode = "204", description = "Successfully deleted")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteBook(@PathVariable @Min(1) @Parameter(name = "id", description = "Book's id", example = "1") long id)
     {
