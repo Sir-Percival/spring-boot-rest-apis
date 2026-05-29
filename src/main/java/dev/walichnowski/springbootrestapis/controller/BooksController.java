@@ -5,6 +5,8 @@ import dev.walichnowski.springbootrestapis.request.BookRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class BooksController
     }
 
     @GetMapping("/{id}")
-    public Book getBookById(@PathVariable long id)
+    public Book getBookById(@PathVariable @Min(1) long id)
     {
         return books.stream()
                 .filter(book -> book.getId() == id)
@@ -53,14 +55,14 @@ public class BooksController
     }
 
     @PostMapping
-    public void createBook(@RequestBody BookRequest bookRequest)
+    public void createBook(@Valid @RequestBody BookRequest bookRequest)
     {
         long id = books.isEmpty() ? 1 : books.getLast().getId() + 1;
         books.add(convertRequestToBook(id, bookRequest));
     }
 
     @PutMapping("/{id}")
-    public void updateBook(@PathVariable long id, @RequestBody BookRequest bookRequest)
+    public void updateBook(@PathVariable @Min(1) long id, @Valid @RequestBody BookRequest bookRequest)
     {
         for(int i = 0; i < books.size(); i++)
         {
@@ -75,7 +77,7 @@ public class BooksController
     @Operation(summary = "Delete book by id", description = "Deletes book by provided id")
     @ApiResponse(responseCode = "200", description = "Successfully deleted")
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable @Parameter(name = "id", description = "Book's id", example = "1") long id)
+    public void deleteBook(@PathVariable @Min(1) @Parameter(name = "id", description = "Book's id", example = "1") long id)
     {
         books.removeIf(book -> book.getId() == id);
     }
