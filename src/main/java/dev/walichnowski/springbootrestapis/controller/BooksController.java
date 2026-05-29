@@ -1,6 +1,7 @@
 package dev.walichnowski.springbootrestapis.controller;
 
 import dev.walichnowski.springbootrestapis.entity.Book;
+import dev.walichnowski.springbootrestapis.request.BookRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -52,23 +53,20 @@ public class BooksController
     }
 
     @PostMapping
-    public void createBook(@RequestBody Book newBook)
+    public void createBook(@RequestBody BookRequest bookRequest)
     {
-        boolean isNewBook = books.stream()
-                .noneMatch(book -> book.getTitle().equalsIgnoreCase(newBook.getTitle()));
-
-        if(isNewBook)
-            books.add(newBook);
+        long id = books.isEmpty() ? 1 : books.getLast().getId() + 1;
+        books.add(convertRequestToBook(id, bookRequest));
     }
 
     @PutMapping("/{id}")
-    public void updateBook(@PathVariable long id, @RequestBody Book updatedBook)
+    public void updateBook(@PathVariable long id, @RequestBody BookRequest bookRequest)
     {
         for(int i = 0; i < books.size(); i++)
         {
             if(books.get(i).getId() == id)
             {
-                books.set(i, updatedBook);
+                books.set(i, convertRequestToBook(id, bookRequest));
                 return;
             }
         }
@@ -80,5 +78,10 @@ public class BooksController
     public void deleteBook(@PathVariable @Parameter(name = "id", description = "Book's id", example = "1") long id)
     {
         books.removeIf(book -> book.getId() == id);
+    }
+
+    private Book convertRequestToBook(long id, BookRequest request)
+    {
+        return new Book(id, request.getTitle(), request.getAuthor(), request.getCategory(), request.getRating());
     }
 }
