@@ -1,6 +1,7 @@
 package dev.walichnowski.springbootrestapis.service;
 
 import dev.walichnowski.springbootrestapis.entity.Employee;
+import dev.walichnowski.springbootrestapis.exception.EmployeeNotFoundException;
 import dev.walichnowski.springbootrestapis.repository.EmployeeRepository;
 import dev.walichnowski.springbootrestapis.request.EmployeeRequest;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class EmployeeService
     public Employee findById(long id)
     {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found #" + id));
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found #" + id));
     }
 
     public Employee save(EmployeeRequest request)
