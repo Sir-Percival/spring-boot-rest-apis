@@ -10,34 +10,28 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class SecurityConfig
 {
     @Bean
-    public InMemoryUserDetailsManager userDetailsManager()
+    public UserDetailsManager userDetailsManager(DataSource dataSource)
     {
-        UserDetails john = User.builder()
-                .username("john")
-                .password("{noop}test123")
-                .roles("EMPLOYEE")
-                .build();
+        JdbcUserDetailsManager detailsManager = new JdbcUserDetailsManager(dataSource);
 
-        UserDetails jane = User.builder()
-                .username("jane")
-                .password("{noop}test123")
-                .roles("EMPLOYEE", "MANAGER")
-                .build();
+        detailsManager.setUsersByUsernameQuery(
+                "SELECT username, password, active FROM users WHERE username=?");
 
-        UserDetails susan = User.builder()
-                .username("susan")
-                .password("{noop}test123")
-                .roles("EMPLOYEE", "MANAGER", "ADMIN")
-                .build();
+        detailsManager.setAuthoritiesByUsernameQuery(
+                "SELECT username, role FROM roles WHERE username=?");
 
-        return new InMemoryUserDetailsManager(john, jane, susan);
+        return detailsManager;
     }
 
     @Bean
